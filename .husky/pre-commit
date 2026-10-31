@@ -1,0 +1,2 @@
+npx lint-staged
+(cd api && npm test) || exit 1

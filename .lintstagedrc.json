@@ -1,0 +1,3 @@
+{
+  "api/**/*.ts": "bash -c 'cd api && npm run lint'"
+}
