@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "promise"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "restriction": "warn"
+  },
+  "env": {
+    "node": true
+  },
+  "ignorePatterns": ["node_modules", "**/*.js", "**/*.d.ts", "dist"],
+  "rules": {
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-non-null-assertion": "warn",
+    "typescript/explicit-member-accessibility": "off"
+  }
+}
