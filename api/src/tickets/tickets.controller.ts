@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.js';
 import { RolesGuard } from '../auth/guards/roles.js';
 import { Roles } from '../auth/decorators/roles.js';
@@ -8,6 +9,8 @@ import { TicketsService } from './tickets.service.js';
 import { CreateTicketDto } from './dto/create-ticket.dto.js';
 import { UpdateTicketStatusDto } from './dto/update-ticket-status.dto.js';
 
+@ApiTags('tickets')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('tickets')
 export class TicketsController {

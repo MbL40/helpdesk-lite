@@ -7,6 +7,7 @@ config({ path: resolve(__dirname, '../../.env') });
 
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { correlationIdMiddleware } from './common/correlation-id.middleware.js';
@@ -27,6 +28,15 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('HelpDesk Lite API')
+    .setDescription('API REST del sistema de tickets de soporte multiempresa')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, swaggerDocument);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 await bootstrap();
