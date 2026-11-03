@@ -2,7 +2,9 @@
   <div class="mx-auto max-w-3xl space-y-6">
     <NuxtLink to="/tickets" class="text-sm text-indigo-600 hover:text-indigo-700">← Volver a tickets</NuxtLink>
 
-    <p v-if="error" role="alert" class="text-sm text-red-600">No se pudo cargar el ticket.</p>
+    <LoadingSpinner v-if="fetchStatus === 'pending'" />
+
+    <p v-else-if="error" role="alert" class="text-sm text-red-600">No se pudo cargar el ticket.</p>
 
     <template v-else-if="ticket">
       <div class="rounded-lg border border-gray-200 bg-white p-6">
@@ -165,7 +167,12 @@ const route = useRoute();
 const ticketId = route.params.id as string;
 const auth = useAuthStore();
 
-const { data: ticket, error, refresh } = await useFetch<TicketDetail>(`/api/tickets/${ticketId}`);
+const {
+  data: ticket,
+  error,
+  status: fetchStatus,
+  refresh,
+} = await useFetch<TicketDetail>(`/api/tickets/${ticketId}`);
 const { data: comments, refresh: refreshComments } = await useFetch<Comment[]>(
   `/api/tickets/${ticketId}/comments`,
 );

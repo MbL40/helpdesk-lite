@@ -36,7 +36,9 @@
       </div>
     </div>
 
-    <p v-if="error" role="alert" class="text-sm text-red-600">No se pudieron cargar los tickets.</p>
+    <LoadingSpinner v-if="fetchStatus === 'pending'" />
+
+    <p v-else-if="error" role="alert" class="text-sm text-red-600">No se pudieron cargar los tickets.</p>
 
     <div v-else class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
       <table class="w-full text-left text-sm">
@@ -169,7 +171,12 @@ const query = computed(() => ({
   pageSize: PAGE_SIZE,
 }));
 
-const { data: response, error, refresh } = await useFetch<TicketsResponse>('/api/tickets', { query });
+const {
+  data: response,
+  error,
+  status: fetchStatus,
+  refresh,
+} = await useFetch<TicketsResponse>('/api/tickets', { query });
 
 const tickets = computed(() => response.value?.data ?? []);
 const totalPages = computed(() => Math.max(1, Math.ceil((response.value?.total ?? 0) / PAGE_SIZE)));

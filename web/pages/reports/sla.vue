@@ -3,7 +3,9 @@
     <h1 class="text-2xl font-semibold text-gray-900">Reporte de SLA</h1>
     <p class="text-sm text-gray-500">Últimos 30 días, por agente.</p>
 
-    <p v-if="error" role="alert" class="text-sm text-red-600">No se pudo cargar el reporte.</p>
+    <LoadingSpinner v-if="status === 'pending'" />
+
+    <p v-else-if="error" role="alert" class="text-sm text-red-600">No se pudo cargar el reporte.</p>
 
     <div v-else class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
       <table class="w-full text-left text-sm">
@@ -47,5 +49,5 @@ interface SlaReportRow {
   avgResolutionBusinessHours: number;
 }
 
-const { data: rows, error } = await useFetch<SlaReportRow[]>('/api/reports/sla');
+const { data: rows, error, status } = await useFetch<SlaReportRow[]>('/api/reports/sla');
 </script>
