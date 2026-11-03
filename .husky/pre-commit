@@ -1,2 +1,15 @@
 npx lint-staged
-(cd api && npm test) || exit 1
+
+STAGED=$(git diff --cached --name-only)
+
+if echo "$STAGED" | grep -q "^api/"; then
+  echo "Cambios detectados en api/ — ejecutando tests del backend"
+  (cd api && npm test) || exit 1
+fi
+
+if echo "$STAGED" | grep -q "^web/"; then
+  echo "Cambios detectados en web/ — ejecutando tests del frontend"
+  (cd web && npm test) || exit 1
+fi
+
+exit 0

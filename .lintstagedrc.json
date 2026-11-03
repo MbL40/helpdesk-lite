@@ -1,3 +1,4 @@
 {
-  "api/**/*.ts": "bash -c 'cd api && npm run lint'"
+  "api/**/*.ts": "bash -c 'cd api && npm run lint'",
+  "web/**/*.{ts,vue}": "bash -c 'cd web && npm run lint'"
 }

@@ -11,8 +11,15 @@
 api/dist/
 web/.nuxt/
 web/.output/
+web/.nitro/
+web/.data/
+web/.cache/
 **/build/
 **/*.tsbuildinfo
+
+# Playwright
+web/playwright-report/
+web/test-results/
 
 # Prisma — cliente generado, se regenera con `prisma generate`
 api/src/generated/
