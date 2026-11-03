@@ -1,7 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.js';
-import { RolesGuard } from '../auth/guards/roles.js';
 import { Roles } from '../auth/decorators/roles.js';
 import { CurrentUser, type RequestUser } from '../auth/decorators/current-user.js';
 import { UserRole } from '../generated/prisma/enums.js';
@@ -11,7 +9,6 @@ import { UpdateTicketStatusDto } from './dto/update-ticket-status.dto.js';
 
 @ApiTags('tickets')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('tickets')
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}

@@ -1,14 +1,11 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.js';
-import { RolesGuard } from '../../auth/guards/roles.js';
 import { CurrentUser, type RequestUser } from '../../auth/decorators/current-user.js';
 import { CommentsService } from './comments.service.js';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
 
 @ApiTags('comments')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('tickets/:ticketId/comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
