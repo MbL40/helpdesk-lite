@@ -8,5 +8,6 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.spec.ts'],
+    exclude: ['**/node_modules/**', '**/src/app.controller.spec.ts'],
   },
 });

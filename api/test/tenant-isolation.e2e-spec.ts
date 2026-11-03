@@ -53,7 +53,7 @@ describe('Tenant isolation (e2e)', () => {
       .get('/api/tickets')
       .set('Authorization', `Bearer ${tokenA}`);
 
-    const ids = res.body.map((t: { id: string }) => t.id);
+    const ids = res.body.data.map((t: { id: string }) => t.id);
     expect(ids).toContain(ticketIdA);
     expect(ids).not.toContain(ticketIdB);
   });

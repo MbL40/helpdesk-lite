@@ -1,19 +1,101 @@
 services:
   db:
-    image: postgres:16.4-alpine
+    image: postgres:16.4-alpine@sha256:5660c2cbfea50c7a9127d17dc4e48543eedd3d7a41a595a2dfa572471e37e64c
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-dev-password}
+      POSTGRES_DB: ${POSTGRES_DB:-helpdesk}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-helpdesk}"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  migrate:
+    build: ./api
+    image: helpdesk-api:local
+    volumes:
+      - ./seed:/seed:ro
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-local-dev-password}@db:5432/${POSTGRES_DB:-helpdesk}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npx prisma migrate deploy && npx tsx prisma/seed.ts"
+
+  api:
+    build: ./api
+    image: helpdesk-api:local
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-local-dev-password}@db:5432/${POSTGRES_DB:-helpdesk}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-change-before-deploying}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3001}
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  web:
+    build: ./web
+    image: helpdesk-web:local
+    environment:
+      NUXT_API_BASE: http://api:3000/api
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    ports:
+      - "3001:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/login"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  web-test:
+    image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+    working_dir: /work
+    volumes:
+      - ./web:/work
+      - type: volume
+        target: /work/node_modules
+    environment:
+      NUXT_API_BASE: http://api:3000/api
+      COOKIE_SECURE: "false"
+    depends_on:
+      api:
+        condition: service_healthy
+    profiles: [test]
+    command: sh -lc "npm ci && npm test && npm run test:e2e"
+
+  api-test:
+    build:
+      context: ./api
+      target: build
+    image: helpdesk-api:test
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-local-dev-password}@db:5432/${POSTGRES_DB:-helpdesk}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-change-before-deploying}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3001}
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    profiles: [test]
+    command: sh -lc "npm test && npm run test:e2e"
 
 volumes:
   pgdata:

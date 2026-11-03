@@ -33,6 +33,12 @@ helpdesk-lite/
 
 ---
 
+## Levantar el stack con Docker
+
+```bash
+docker compose up --build
+```
+
 ## Desarrollo local (backend)
 
 ```bash
