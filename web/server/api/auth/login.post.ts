@@ -1,3 +1,5 @@
+import { setCsrfToken } from '../../utils/csrf';
+
 interface LoginResponse {
   accessToken: string;
   refreshToken: string;
@@ -21,7 +23,9 @@ export default defineEventHandler(async (event) => {
 
   const cookieOpts = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure:
+      process.env.COOKIE_SECURE === 'true' ||
+      (process.env.NODE_ENV === 'production' && process.env.COOKIE_SECURE !== 'false'),
     sameSite: 'lax' as const,
     path: '/',
   };
@@ -31,6 +35,7 @@ export default defineEventHandler(async (event) => {
     ...cookieOpts,
     maxAge: 7 * 24 * 60 * 60,
   });
+  setCsrfToken(event);
 
   return { user: data.user };
 });

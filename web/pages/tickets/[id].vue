@@ -229,7 +229,7 @@ async function assign() {
   assigning.value = true;
   actionError.value = '';
   try {
-    await $fetch(`/api/tickets/${ticketId}/assign`, { method: 'PATCH' });
+    await useCsrfFetch(`/api/tickets/${ticketId}/assign`, { method: 'PATCH' });
     await Promise.all([refresh(), refreshAuditLog()]);
   } catch (err) {
     const fetchError = err as { data?: { statusMessage?: string } };
@@ -242,7 +242,7 @@ async function assign() {
 async function changeStatus(status: string) {
   actionError.value = '';
   try {
-    await $fetch(`/api/tickets/${ticketId}/status`, { method: 'PATCH', body: { status } });
+    await useCsrfFetch(`/api/tickets/${ticketId}/status`, { method: 'PATCH', body: { status } });
     await Promise.all([refresh(), refreshAuditLog()]);
   } catch (err) {
     const fetchError = err as { data?: { statusMessage?: string } };
@@ -259,7 +259,7 @@ async function submitComment() {
   if (!newComment.value.trim()) return;
   postingComment.value = true;
   try {
-    await $fetch(`/api/tickets/${ticketId}/comments`, {
+    await useCsrfFetch(`/api/tickets/${ticketId}/comments`, {
       method: 'POST',
       body: { body: newComment.value },
     });

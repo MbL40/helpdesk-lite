@@ -8,8 +8,14 @@ mockNuxtImport('navigateTo', () => navigateToMock);
 
 describe('login.vue', () => {
   it('envía las credenciales y navega al dashboard si el login es exitoso', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      user: { id: '1', name: 'Agente Prueba', email: 'agente@acme.com', role: 'AGENT' },
+    const fetchMock = vi.fn((url: string) => {
+      if (url === '/api/auth/csrf') return Promise.resolve({ csrfToken: 'csrf-test-token' });
+      if (url === '/api/auth/login') {
+        return Promise.resolve({
+          user: { id: '1', name: 'Agente Prueba', email: 'agente@acme.com', role: 'AGENT' },
+        });
+      }
+      return Promise.reject(new Error('No autenticado'));
     });
     vi.stubGlobal('$fetch', fetchMock);
 
@@ -20,15 +26,23 @@ describe('login.vue', () => {
     await wrapper.find('form').trigger('submit.prevent');
     await flushPromises();
 
+    expect(fetchMock).toHaveBeenCalledWith('/api/auth/csrf');
     expect(fetchMock).toHaveBeenCalledWith('/api/auth/login', {
       method: 'POST',
       body: { slug: 'acme', email: 'agente@acme.com', password: 'Test1234!' },
+      headers: { 'x-csrf-token': 'csrf-test-token' },
     });
     expect(navigateToMock).toHaveBeenCalledWith('/dashboard');
   });
 
   it('muestra un mensaje de error si el login falla', async () => {
-    const fetchMock = vi.fn().mockRejectedValue({ data: { statusMessage: 'Credenciales inválidas' } });
+    const fetchMock = vi.fn((url: string) => {
+      if (url === '/api/auth/csrf') return Promise.resolve({ csrfToken: 'csrf-test-token' });
+      if (url === '/api/auth/login') {
+        return Promise.reject({ data: { statusMessage: 'Credenciales inválidas' } });
+      }
+      return Promise.reject(new Error('No autenticado'));
+    });
     vi.stubGlobal('$fetch', fetchMock);
 
     const wrapper = await mountSuspended(LoginPage);

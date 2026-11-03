@@ -80,3 +80,7 @@ El ticket de ejemplo “Integración con ERP” contiene una instrucción dirigi
 - Las rutas de tickets verifican organización y, para clientes, propiedad del ticket; un ID ajeno se responde como no encontrado.
 - Las operaciones de asignación y cambio de estado escriben auditoría.
 - Las descripciones y comentarios del seed se conservan como texto y Vue los renderiza escapados.
+
+## CSRF y sesión del navegador
+
+Las cookies de sesión son `httpOnly` y `SameSite=Lax`. Las rutas BFF de escritura exigen un token CSRF coincidente en cookie y encabezado, y un `Origin` permitido; si no, responden `403`. El token se renueva al iniciar sesión. La API restringe CORS a `FRONTEND_ORIGIN`.

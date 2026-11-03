@@ -230,7 +230,7 @@ async function assign(ticketId: string) {
   assigning.value = ticketId;
   actionError.value = '';
   try {
-    await $fetch(`/api/tickets/${ticketId}/assign`, { method: 'PATCH' });
+    await useCsrfFetch(`/api/tickets/${ticketId}/assign`, { method: 'PATCH' });
     await refresh();
   } catch (err) {
     const fetchError = err as { data?: { statusMessage?: string } };
@@ -243,7 +243,7 @@ async function assign(ticketId: string) {
 async function changeStatus(ticketId: string, status: string) {
   actionError.value = '';
   try {
-    await $fetch(`/api/tickets/${ticketId}/status`, { method: 'PATCH', body: { status } });
+    await useCsrfFetch(`/api/tickets/${ticketId}/status`, { method: 'PATCH', body: { status } });
     await refresh();
   } catch (err) {
     const fetchError = err as { data?: { statusMessage?: string } };

@@ -68,7 +68,7 @@ async function onSubmit() {
   loading.value = true;
   error.value = '';
   try {
-    await $fetch('/api/tickets', { method: 'POST', body: form });
+    await useCsrfFetch('/api/tickets', { method: 'POST', body: form });
     await navigateTo('/tickets');
   } catch (err) {
     const fetchError = err as { data?: { statusMessage?: string } };

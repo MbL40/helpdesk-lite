@@ -62,7 +62,7 @@ async function onSubmit() {
   loading.value = true;
   error.value = '';
   try {
-    const { user } = await $fetch('/api/auth/login', {
+    const { user } = await useCsrfFetch<{ user: { id: string; name: string; email: string; role: string } }>('/api/auth/login', {
       method: 'POST',
       body: form,
     });

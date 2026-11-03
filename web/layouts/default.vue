@@ -40,7 +40,7 @@
 const auth = useAuthStore();
 
 async function logout() {
-  await $fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+  await useCsrfFetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
   auth.setUser(null);
   await navigateTo('/login');
 }

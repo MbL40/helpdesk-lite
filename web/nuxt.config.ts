@@ -11,5 +11,6 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     apiBase: 'http://localhost:3000/api',
+    frontendOrigin: process.env.NUXT_FRONTEND_ORIGIN ?? process.env.FRONTEND_ORIGIN ?? 'http://localhost:3001',
   },
 })
