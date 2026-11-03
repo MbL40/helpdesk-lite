@@ -8,7 +8,10 @@
         <nav class="flex items-center gap-4 text-sm">
           <NuxtLink to="/dashboard" class="text-gray-600 hover:text-gray-900">Dashboard</NuxtLink>
           <NuxtLink to="/tickets" class="text-gray-600 hover:text-gray-900">Tickets</NuxtLink>
-          <span v-if="auth.user" class="text-gray-400">{{ auth.user.name ?? auth.user.role }}</span>
+          <span v-if="auth.user" class="flex items-center gap-3 text-gray-400">
+            {{ auth.user.name ?? auth.user.role }}
+            <button class="text-gray-600 hover:text-gray-900" @click="logout">Salir</button>
+          </span>
         </nav>
       </div>
     </header>
@@ -20,4 +23,10 @@
 
 <script setup lang="ts">
 const auth = useAuthStore();
+
+async function logout() {
+  await $fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+  auth.setUser(null);
+  await navigateTo('/login');
+}
 </script>
