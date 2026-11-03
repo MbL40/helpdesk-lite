@@ -40,13 +40,21 @@ export class TicketsService {
     return this.prisma.ticket.findMany({ where, orderBy: { createdAt: 'desc' } });
   }
 
-  async updateStatus(user: RequestUser, ticketId: string, nextStatus: TicketStatus) {
-    const ticket = await this.prisma.ticket.findFirst({
-      where: { id: ticketId, orgId: user.orgId },
+  async findOne(user: RequestUser, ticketId: string) {
+    return this.findAccessibleTicket(user, ticketId);
+  }
+
+  async findAuditLog(user: RequestUser, ticketId: string) {
+    await this.findAccessibleTicket(user, ticketId);
+    return this.prisma.auditLog.findMany({
+      where: { ticketId },
+      include: { user: { select: { name: true, role: true } } },
+      orderBy: { createdAt: 'asc' },
     });
-    if (!ticket) {
-      throw new NotFoundException('Ticket no encontrado');
-    }
+  }
+
+  async updateStatus(user: RequestUser, ticketId: string, nextStatus: TicketStatus) {
+    const ticket = await this.findAccessibleTicket(user, ticketId);
     if (!isValidStatusTransition(ticket.status, nextStatus)) {
       throw new ConflictException(`No se puede pasar de ${ticket.status} a ${nextStatus}`);
     }
@@ -70,12 +78,7 @@ export class TicketsService {
   }
 
   async assign(user: RequestUser, ticketId: string) {
-    const ticket = await this.prisma.ticket.findFirst({
-      where: { id: ticketId, orgId: user.orgId },
-    });
-    if (!ticket) {
-      throw new NotFoundException('Ticket no encontrado');
-    }
+    await this.findAccessibleTicket(user, ticketId);
 
     return this.prisma.$transaction(async (tx) => {
       const { count } = await tx.ticket.updateMany({
@@ -98,5 +101,24 @@ export class TicketsService {
 
       return tx.ticket.findUniqueOrThrow({ where: { id: ticketId } });
     });
+  }
+
+  private async findAccessibleTicket(user: RequestUser, ticketId: string) {
+    const where =
+      user.role === UserRole.CUSTOMER
+        ? { id: ticketId, orgId: user.orgId, customerId: user.userId }
+        : { id: ticketId, orgId: user.orgId };
+
+    const ticket = await this.prisma.ticket.findFirst({
+      where,
+      include: {
+        customer: { select: { id: true, name: true, email: true } },
+        agent: { select: { id: true, name: true, email: true } },
+      },
+    });
+    if (!ticket) {
+      throw new NotFoundException('Ticket no encontrado');
+    }
+    return ticket;
   }
 }

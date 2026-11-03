@@ -1,15 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { UserRole } from '../../generated/prisma/enums.js';
 import type { RequestUser } from '../../auth/decorators/current-user.js';
+import { TicketsService } from '../tickets.service.js';
 import type { CreateCommentDto } from './dto/create-comment.dto.js';
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ticketsService: TicketsService,
+  ) {}
 
   async create(user: RequestUser, ticketId: string, dto: CreateCommentDto) {
-    await this.assertTicketAccessible(user, ticketId);
+    await this.ticketsService.findOne(user, ticketId);
 
     return this.prisma.comment.create({
       data: {
@@ -21,23 +24,12 @@ export class CommentsService {
   }
 
   async findAll(user: RequestUser, ticketId: string) {
-    await this.assertTicketAccessible(user, ticketId);
+    await this.ticketsService.findOne(user, ticketId);
 
     return this.prisma.comment.findMany({
       where: { ticketId },
+      include: { user: { select: { name: true, role: true } } },
       orderBy: { createdAt: 'asc' },
     });
-  }
-
-  private async assertTicketAccessible(user: RequestUser, ticketId: string): Promise<void> {
-    const where =
-      user.role === UserRole.CUSTOMER
-        ? { id: ticketId, orgId: user.orgId, customerId: user.userId }
-        : { id: ticketId, orgId: user.orgId };
-
-    const ticket = await this.prisma.ticket.findFirst({ where });
-    if (!ticket) {
-      throw new NotFoundException('Ticket no encontrado');
-    }
   }
 }

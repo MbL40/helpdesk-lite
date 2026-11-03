@@ -24,6 +24,16 @@ export class TicketsController {
     return this.ticketsService.findAllForUser(user);
   }
 
+  @Get(':id')
+  findOne(@CurrentUser() user: RequestUser, @Param('id') id: string) {
+    return this.ticketsService.findOne(user, id);
+  }
+
+  @Get(':id/audit-log')
+  findAuditLog(@CurrentUser() user: RequestUser, @Param('id') id: string) {
+    return this.ticketsService.findAuditLog(user, id);
+  }
+
   @Roles(UserRole.AGENT)
   @Patch(':id/status')
   updateStatus(
