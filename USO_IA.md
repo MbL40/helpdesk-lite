@@ -33,3 +33,19 @@ reuso de un token ya rotado, y rechazo de campos no declarados en el body.
 `ValidationPipe`, no existe en NestJS ni en `class-validator` — se verificó contra los
 `.d.ts` reales y se usó la configuración equivalente real (`whitelist` +
 `forbidNonWhitelisted`).
+
+## Formato uniforme de error
+
+El filtro de excepciones y el middleware de correlation ID. Al aplicarlos se perdió la carga de `.env` en `main.ts` — lo detecté porque el backend no arrancaba.
+
+## Módulo de tickets
+
+El SLA, la máquina de estados, `assign` y comentarios, con las decisiones tomadas de antemano. Verifiqué el caso 4 del SLA a mano, reapliqué el endpoint de `assign` que se revirtió por error, y registré el módulo de comentarios que había quedado sin conectar. Probé la condición de carrera con dos peticiones en paralelo reales.
+
+## Reporte de SLA
+
+La consulta SQL. Corregí un bug de zona horaria (UTC vs Bogotá) verificándolo con fechas de prueba calculadas a mano antes de confiar en el resultado.
+
+## Integración del frontend (BFF, Tailwind, logout)
+
+Las rutas proxy de Nitro, el middleware de auth, los estilos y el logout. Corregí un middleware mal nombrado (nunca se aplicaba) y un error de tipos en `apiFetch`.
