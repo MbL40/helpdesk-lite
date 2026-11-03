@@ -33,4 +33,10 @@ export class TicketsController {
   ) {
     return this.ticketsService.updateStatus(user, id, dto.status);
   }
+
+  @Roles(UserRole.AGENT)
+  @Patch(':id/assign')
+  assign(@CurrentUser() user: RequestUser, @Param('id') id: string) {
+    return this.ticketsService.assign(user, id);
+  }
 }

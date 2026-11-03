@@ -68,4 +68,35 @@ export class TicketsService {
       return updated;
     });
   }
+
+  async assign(user: RequestUser, ticketId: string) {
+    const ticket = await this.prisma.ticket.findFirst({
+      where: { id: ticketId, orgId: user.orgId },
+    });
+    if (!ticket) {
+      throw new NotFoundException('Ticket no encontrado');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const { count } = await tx.ticket.updateMany({
+        where: { id: ticketId, agentId: null },
+        data: { agentId: user.userId },
+      });
+      if (count === 0) {
+        throw new ConflictException('Este ticket ya fue asignado');
+      }
+
+      await tx.auditLog.create({
+        data: {
+          ticketId,
+          userId: user.userId,
+          action: AuditAction.AGENT_ASSIGNED,
+          oldValue: null,
+          newValue: user.userId,
+        },
+      });
+
+      return tx.ticket.findUniqueOrThrow({ where: { id: ticketId } });
+    });
+  }
 }
