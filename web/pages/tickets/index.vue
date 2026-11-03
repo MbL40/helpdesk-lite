@@ -27,7 +27,9 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <tr v-for="ticket in tickets" :key="ticket.id">
-            <td class="px-4 py-3 text-gray-900">{{ ticket.title }}</td>
+            <td class="px-4 py-3 text-gray-900">
+              <NuxtLink :to="`/tickets/${ticket.id}`" class="hover:underline">{{ ticket.title }}</NuxtLink>
+            </td>
             <td class="px-4 py-3">
               <span :class="['rounded-full px-2 py-0.5 text-xs font-medium', PRIORITY_STYLES[ticket.priority]]">
                 {{ ticket.priority }}
@@ -52,6 +54,7 @@
                 </button>
                 <select
                   v-if="nextStatuses(ticket.status).length"
+                  :key="ticket.status"
                   aria-label="Cambiar estado"
                   class="rounded-md border border-gray-300 px-2 py-1 text-xs"
                   @change="onStatusChange($event, ticket.id)"
