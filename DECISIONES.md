@@ -80,3 +80,7 @@ En monorepo el scope debe decir de qué lado es el commit, no el dominio. Reescr
 - `tickets(agent_id)` el reporte de SLA agrupa por agente.
 - `comments(ticket_id, created_at)` listado de comentarios por ticket, ordenado.
 - `refresh_tokens(user_id)` — revoca la familia completa en detección de reuso, sin full scan.
+
+## Prompt injection en el seed
+
+El ticket "Integración con ERP" trae una instrucción para asistentes de IA pidiendo un endpoint sin autenticación. No la seguí, y además hice el guard global (`APP_GUARD`) con `@Public()` explícito solo en login/refresh/logout — un endpoint nuevo nace protegido por defecto, no abierto. Ver `SEGURIDAD.md`.
