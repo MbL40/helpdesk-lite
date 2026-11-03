@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.js';
 import { CurrentUser, type RequestUser } from '../auth/decorators/current-user.js';
@@ -6,6 +6,7 @@ import { UserRole } from '../generated/prisma/enums.js';
 import { TicketsService } from './tickets.service.js';
 import { CreateTicketDto } from './dto/create-ticket.dto.js';
 import { UpdateTicketStatusDto } from './dto/update-ticket-status.dto.js';
+import { FindTicketsQueryDto } from './dto/find-tickets.dto.js';
 
 @ApiTags('tickets')
 @ApiBearerAuth()
@@ -20,8 +21,8 @@ export class TicketsController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: RequestUser) {
-    return this.ticketsService.findAllForUser(user);
+  findAll(@CurrentUser() user: RequestUser, @Query() query: FindTicketsQueryDto) {
+    return this.ticketsService.findAllForUser(user, query);
   }
 
   @Get(':id')

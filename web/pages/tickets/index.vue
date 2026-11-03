@@ -11,6 +11,31 @@
       </NuxtLink>
     </div>
 
+    <div class="flex flex-wrap items-center gap-3">
+      <div>
+        <label for="filter-status" class="sr-only">Filtrar por estado</label>
+        <select
+          id="filter-status"
+          v-model="statusFilter"
+          class="rounded-md border border-gray-300 px-2 py-1 text-sm"
+        >
+          <option value="">Todos los estados</option>
+          <option v-for="status in STATUSES" :key="status" :value="status">{{ status }}</option>
+        </select>
+      </div>
+      <div>
+        <label for="filter-priority" class="sr-only">Filtrar por prioridad</label>
+        <select
+          id="filter-priority"
+          v-model="priorityFilter"
+          class="rounded-md border border-gray-300 px-2 py-1 text-sm"
+        >
+          <option value="">Todas las prioridades</option>
+          <option v-for="priority in PRIORITIES" :key="priority" :value="priority">{{ priority }}</option>
+        </select>
+      </div>
+    </div>
+
     <p v-if="error" role="alert" class="text-sm text-red-600">No se pudieron cargar los tickets.</p>
 
     <div v-else class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
@@ -67,8 +92,31 @@
               </div>
             </td>
           </tr>
+          <tr v-if="tickets.length === 0">
+            <td :colspan="auth.user?.role === 'AGENT' ? 6 : 5" class="px-4 py-6 text-center text-gray-400">
+              Sin tickets que coincidan con los filtros.
+            </td>
+          </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="flex items-center justify-between text-sm text-gray-600">
+      <button
+        :disabled="page <= 1"
+        class="rounded-md border border-gray-300 px-3 py-1 disabled:opacity-50"
+        @click="page--"
+      >
+        Anterior
+      </button>
+      <span>Página {{ page }} de {{ totalPages }}</span>
+      <button
+        :disabled="page >= totalPages"
+        class="rounded-md border border-gray-300 px-3 py-1 disabled:opacity-50"
+        @click="page++"
+      >
+        Siguiente
+      </button>
     </div>
 
     <p v-if="actionError" role="alert" class="text-sm text-red-600">{{ actionError }}</p>
@@ -88,8 +136,38 @@ interface Ticket {
   agentId: string | null;
 }
 
+interface TicketsResponse {
+  data: Ticket[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+const STATUSES: TicketStatus[] = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'];
+const PRIORITIES: TicketPriority[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
+const PAGE_SIZE = 10;
+
 const auth = useAuthStore();
-const { data: tickets, error, refresh } = await useFetch<Ticket[]>('/api/tickets');
+const statusFilter = ref('');
+const priorityFilter = ref('');
+const page = ref(1);
+
+const query = computed(() => ({
+  status: statusFilter.value || undefined,
+  priority: priorityFilter.value || undefined,
+  page: page.value,
+  pageSize: PAGE_SIZE,
+}));
+
+const { data: response, error, refresh } = await useFetch<TicketsResponse>('/api/tickets', { query });
+
+const tickets = computed(() => response.value?.data ?? []);
+const totalPages = computed(() => Math.max(1, Math.ceil((response.value?.total ?? 0) / PAGE_SIZE)));
+
+watch([statusFilter, priorityFilter], () => {
+  page.value = 1;
+});
+
 const assigning = ref<string | null>(null);
 const actionError = ref('');
 

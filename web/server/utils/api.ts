@@ -3,7 +3,11 @@ import type { H3Event } from 'h3';
 export async function apiFetch<T>(
   event: H3Event,
   path: string,
-  options: { method?: 'GET' | 'POST' | 'PATCH'; body?: unknown } = {},
+  options: {
+    method?: 'GET' | 'POST' | 'PATCH';
+    body?: unknown;
+    query?: Record<string, unknown>;
+  } = {},
 ): Promise<T> {
   const token = getCookie(event, 'access_token');
   if (!token) {

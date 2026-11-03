@@ -6,6 +6,7 @@ import type { RequestUser } from '../auth/decorators/current-user.js';
 import { SlaService } from './sla/sla.service.js';
 import { isValidStatusTransition } from './ticket-status-machine.js';
 import type { CreateTicketDto } from './dto/create-ticket.dto.js';
+import { FindTicketsQueryDto } from './dto/find-tickets.dto.js';
 
 @Injectable()
 export class TicketsService {
@@ -31,13 +32,25 @@ export class TicketsService {
     });
   }
 
-  findAllForUser(user: RequestUser) {
-    const where =
-      user.role === UserRole.CUSTOMER
-        ? { orgId: user.orgId, customerId: user.userId }
-        : { orgId: user.orgId };
-
-    return this.prisma.ticket.findMany({ where, orderBy: { createdAt: 'desc' } });
+  async findAllForUser(user: RequestUser, query: FindTicketsQueryDto) {
+    const where = {
+      orgId: user.orgId,
+      ...(user.role === UserRole.CUSTOMER ? { customerId: user.userId } : {}),
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.priority ? { priority: query.priority } : {}),
+    };
+  
+    const [data, total] = await Promise.all([
+      this.prisma.ticket.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+      }),
+      this.prisma.ticket.count({ where }),
+    ]);
+  
+    return { data, total, page: query.page, pageSize: query.pageSize };
   }
 
   async findOne(user: RequestUser, ticketId: string) {
