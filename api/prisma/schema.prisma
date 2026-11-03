@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,4 +5,134 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  AGENT
+  CUSTOMER
+
+  @@map("user_role")
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+
+  @@map("ticket_status")
+}
+
+enum TicketPriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+
+  @@map("ticket_priority")
+}
+
+enum AuditAction {
+  STATUS_CHANGED
+  AGENT_ASSIGNED
+
+  @@map("audit_action")
+}
+
+model Organization {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  users   User[]
+  tickets Ticket[]
+
+  @@map("organizations")
+}
+
+model User {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId        String   @map("org_id") @db.Uuid
+  email        String
+  passwordHash String   @map("password_hash")
+  name         String
+  role         UserRole
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  organization      Organization @relation(fields: [orgId], references: [id])
+  ticketsAsCustomer Ticket[]     @relation("TicketCustomer")
+  ticketsAsAgent    Ticket[]     @relation("TicketAgent")
+  comments          Comment[]
+  auditLogs         AuditLog[]
+
+  @@unique([orgId, email])
+  @@map("users")
+}
+
+model Ticket {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgId       String         @map("org_id") @db.Uuid
+  customerId  String         @map("customer_id") @db.Uuid
+  agentId     String?        @map("agent_id") @db.Uuid
+  title       String
+  description String
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority
+  slaDueAt    DateTime?      @map("sla_due_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [orgId], references: [id])
+  customer     User         @relation("TicketCustomer", fields: [customerId], references: [id])
+  agent        User?        @relation("TicketAgent", fields: [agentId], references: [id])
+  comments     Comment[]
+  auditLogs    AuditLog[]
+
+  @@map("tickets")
+}
+
+model Comment {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticketId  String   @map("ticket_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  body      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("comments")
+}
+
+model AuditLog {
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticketId  String      @map("ticket_id") @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  action    AuditAction
+  oldValue  String?     @map("old_value")
+  newValue  String?     @map("new_value")
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("audit_log")
+}
+
+model Holiday {
+  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dateDay DateTime @unique @map("date_day") @db.Date
+  name    String?
+
+  @@map("holidays")
+}
+
+model BusinessHour {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dayOfWeek Int      @map("day_of_week")
+  startTime DateTime @default(dbgenerated("'08:00'")) @map("start_time") @db.Time
+  endTime   DateTime @default(dbgenerated("'18:00'")) @map("end_time") @db.Time
+
+  @@map("business_hours")
 }
