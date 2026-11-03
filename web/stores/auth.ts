@@ -1,7 +1,7 @@
 interface AuthUser {
   id: string;
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   role: string;
 }
 
