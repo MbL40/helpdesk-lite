@@ -79,6 +79,14 @@ export class AuthService {
     return this.issueTokens(user);
   }
 
+  async logout(rawToken: string): Promise<void> {
+    const tokenHash = this.hashToken(rawToken);
+    await this.prisma.refreshToken.updateMany({
+      where: { tokenHash, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
   private async issueTokens(user: UserModel) {
     const payload = { sub: user.id, orgId: user.orgId, role: user.role };
 
