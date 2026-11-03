@@ -18,3 +18,12 @@ el código de NestJS use nombres de columna SQL en vez de los esperados en TS.
 **UUIDs generados por Postgres** (`gen_random_uuid()`) en vez del `uuid()` de Prisma
 (que genera el valor en la app) — nativo desde Postgres 13, y garantiza IDs válidos
 también en inserciones hechas directamente en SQL (ej. seed script)
+
+## Multi-tenancy: subdominio por organización
+
+**Por qué no un selector en un login genérico.** `email` es único por organización
+(`UNIQUE(org_id, email)`), no global, así que hay que resolver la organización antes
+de buscar el usuario. Un selector lo resuelve igual de bien — ir por subdominio real
+(`acme.helpdesk.com`) es decisión de producto, no de seguridad: URL marcable por
+organización, cero fricción para el usuario final, y camino natural hacia dominios
+propios del cliente más adelante. Se agrega `organizations.slug` (único).
