@@ -27,3 +27,9 @@ de buscar el usuario. Un selector lo resuelve igual de bien — ir por subdomini
 (`acme.helpdesk.com`) es decisión de producto, no de seguridad: URL marcable por
 organización, cero fricción para el usuario final, y camino natural hacia dominios
 propios del cliente más adelante. Se agrega `organizations.slug` (único).
+
+## Requisito técnicamente inviable: `whitelistStrict`
+
+Encontré que `whitelistStrict`, la opción que pide el enunciado para `ValidationPipe`, no
+existe — ni en `ValidationPipeOptions` de `@nestjs/common` ni en `ValidatorOptions` de
+`class-validator`. Interpreté que lo que se buscaba era rechazar, no solo descartar, campos no declarados en el DTO, así que usé `whitelist: true` + `forbidNonWhitelisted: true`, que es lo que realmente logra eso.

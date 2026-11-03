@@ -13,3 +13,23 @@ en la base de datos (@map/@@map) y UUIDs generados por Postgres (gen_random_uuid
 **Verificación:** corrí `npx prisma validate`/`format`, y revisé el SQL de la migración
 generada antes de aceptarla — en particular el ON DELETE de cada foreign key, que decidí
 dejar en RESTRICT (default de Prisma) para proteger el historial de auditoría.
+
+## Módulo de autenticación (JWT, guards, refresh token rotativo)
+
+**Contexto:** decidí el diseño de seguridad antes de pedir código — argon2id, access +
+refresh con rotación, Bearer header. Al releer el enunciado completo confirmé que el
+token no puede ser accesible desde JS del navegador; ajusté el transporte: Bearer solo
+entre Nuxt y el API, nunca expuesto al navegador.
+
+**Uso de IA:** generé con IA el módulo completo (DTOs, AuthService, AuthController,
+JwtStrategy, guards, decorators)
+
+**Qué corregí:** un error de TypeScript en JwtStrategy (`process.env.JWT_SECRET` es
+`string | undefined`) — lo resolví con un helper `requireEnv()` que falla explícito, en
+vez de forzar el tipo con `!`. Verifiqué el flujo completo con curl real: login, refresh,
+reuso de un token ya rotado, y rechazo de campos no declarados en el body.
+
+**Qué detectó la IA:** `whitelistStrict`, la opción que pide el enunciado para
+`ValidationPipe`, no existe en NestJS ni en `class-validator` — se verificó contra los
+`.d.ts` reales y se usó la configuración equivalente real (`whitelist` +
+`forbidNonWhitelisted`).
