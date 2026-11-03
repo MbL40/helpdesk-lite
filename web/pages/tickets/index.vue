@@ -65,7 +65,17 @@
                 {{ ticket.status }}
               </span>
             </td>
-            <td class="px-4 py-3 text-gray-500">{{ formatDate(ticket.slaDueAt) }}</td>
+            <td class="px-4 py-3 text-gray-500">
+              <div class="flex items-center gap-2">
+                <span>{{ formatDate(ticket.slaDueAt) }}</span>
+                <span
+                  v-if="slaIndicatorInfo(ticket)"
+                  :class="['rounded-full px-2 py-0.5 text-xs font-medium', slaIndicatorInfo(ticket)!.style]"
+                >
+                  {{ slaIndicatorInfo(ticket)!.label }}
+                </span>
+              </div>
+            </td>
             <td class="px-4 py-3 text-gray-500">{{ ticket.agentId ?? 'Sin asignar' }}</td>
             <td v-if="auth.user?.role === 'AGENT'" class="px-4 py-3">
               <div class="flex items-center gap-2">
@@ -197,7 +207,16 @@ function nextStatuses(status: TicketStatus) {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+  return new Date(value).toLocaleString('es-CO');
+}
+
+function slaIndicatorInfo(ticket: { slaDueAt: string; status: TicketStatus }) {
+  if (ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') return null;
+  const due = new Date(ticket.slaDueAt).getTime();
+  const now = Date.now();
+  if (due < now) return { label: 'Vencido', style: 'bg-red-100 text-red-700' };
+  if (due - now <= 60 * 60 * 1000) return { label: 'Vence pronto', style: 'bg-amber-100 text-amber-700' };
+  return null;
 }
 
 async function assign(ticketId: string) {

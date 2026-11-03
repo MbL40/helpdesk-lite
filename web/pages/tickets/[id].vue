@@ -31,7 +31,15 @@
           </div>
           <div>
             <dt class="text-gray-500">Vence SLA</dt>
-            <dd class="text-gray-900">{{ formatDate(ticket.slaDueAt) }}</dd>
+            <dd class="flex items-center gap-2 text-gray-900">
+              <span>{{ formatDate(ticket.slaDueAt) }}</span>
+              <span
+                v-if="slaIndicator"
+                :class="['rounded-full px-2 py-0.5 text-xs font-medium', slaIndicator.style]"
+              >
+                {{ slaIndicator.label }}
+              </span>
+            </dd>
           </div>
           <div>
             <dt class="text-gray-500">Creado</dt>
@@ -196,8 +204,19 @@ function nextStatuses(status: TicketStatus) {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+  return new Date(value).toLocaleString('es-CO');
 }
+
+function slaIndicatorInfo(t: { slaDueAt: string; status: TicketStatus }) {
+  if (t.status === 'RESOLVED' || t.status === 'CLOSED') return null;
+  const due = new Date(t.slaDueAt).getTime();
+  const now = Date.now();
+  if (due < now) return { label: 'Vencido', style: 'bg-red-100 text-red-700' };
+  if (due - now <= 60 * 60 * 1000) return { label: 'Vence pronto', style: 'bg-amber-100 text-amber-700' };
+  return null;
+}
+
+const slaIndicator = computed(() => (ticket.value ? slaIndicatorInfo(ticket.value) : null));
 
 async function assign() {
   assigning.value = true;
