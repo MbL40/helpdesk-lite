@@ -91,6 +91,8 @@ model Ticket {
   comments     Comment[]
   auditLogs    AuditLog[]
 
+  @@index([orgId])
+  @@index([agentId])
   @@map("tickets")
 }
 
@@ -104,6 +106,7 @@ model Comment {
   ticket Ticket @relation(fields: [ticketId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
 
+  @@index([ticketId, createdAt])
   @@map("comments")
 }
 
@@ -132,6 +135,7 @@ model RefreshToken {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("refresh_tokens")
 }
 

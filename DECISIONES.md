@@ -73,3 +73,10 @@ Resolución sale de `audit_log` (última transición a `RESOLVED`), no de una co
 ## Scope de commits: `api`/`web`
 
 En monorepo el scope debe decir de qué lado es el commit, no el dominio. Reescribí el historial; el commit de logout (cross-cutting) lo dividí en dos.
+
+## Índices de BD
+
+- `tickets(org_id)` el filtro más repetido de todo el backend.
+- `tickets(agent_id)` el reporte de SLA agrupa por agente.
+- `comments(ticket_id, created_at)` listado de comentarios por ticket, ordenado.
+- `refresh_tokens(user_id)` — revoca la familia completa en detección de reuso, sin full scan.
