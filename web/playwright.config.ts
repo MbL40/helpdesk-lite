@@ -5,13 +5,13 @@ export default defineConfig({
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3001',
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'npm run build && npm run preview',
-    url: 'http://localhost:3000',
+    command: 'PORT=3001 npm run build && PORT=3001 npm run preview',
+    url: 'http://localhost:3001',
     reuseExistingServer: !process.env.CI,
   },
 });
