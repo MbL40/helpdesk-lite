@@ -12,9 +12,10 @@ api/dist/
 web/.nuxt/
 web/.output/
 **/build/
+**/*.tsbuildinfo
 
 # Prisma — cliente generado, se regenera con `prisma generate`
-api/generated/
+api/src/generated/
 
 # Test coverage
 **/coverage/
