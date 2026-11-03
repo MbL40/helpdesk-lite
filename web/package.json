@@ -31,5 +31,8 @@
     "prettier": "3.9.10",
     "typescript": "6.0.3",
     "vitest": "4.1.12"
+  },
+  "overrides": {
+    "h3": "1.15.11"
   }
 }
