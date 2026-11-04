@@ -137,3 +137,4 @@ Makefile              Ejecución de pruebas en contenedores
 - [DECISIONES.md](./DECISIONES.md): elecciones técnicas y discrepancias del enunciado.
 - [SEGURIDAD.md](./SEGURIDAD.md): revisión de los tres ejemplos heredados, controles actuales y límites conocidos.
 - [USO_IA.md](./USO_IA.md): declaración del uso de asistentes de IA.
+- [DOS_DIAS_MAS.md](./DOS_DIAS_MAS.md): evolución propuesta para dos días adicionales de trabajo.
